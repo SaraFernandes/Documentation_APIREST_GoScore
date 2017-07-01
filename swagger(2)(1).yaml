@@ -1,0 +1,1255 @@
+swagger: '2.0'
+info:
+  title: DOCUMENTAÇÃO DA API REST Go Score!
+  description: >-
+    Documentação em  YAML Swagger da API REST utilizada pela aplicação Go Score!
+    Este documento está focado não só nas necessidades dos participantes do
+    projeto, mas também na dos usuários que utilizarão o software. Aqui são
+    listados os principais recursos administrativos do Go Score!
+  version: 1.0.0
+  contact:
+    name: Go Score!
+    email: sara@fastdone.com.br
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: dev.goscore.com.br
+schemes:
+  - https
+basePath: /api/v1
+produces:
+  - application/json
+paths:
+  /usuarios/listar:
+    get:
+      summary: Lista todos os usuários administradores
+      description: |
+        retorna um array/json com todos os usuários administradores do Go Score!
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      tags:
+        - Users
+      summary: Login do usuário no sistema
+      description: ''
+      operationId: doLogin
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - name: email
+          in: query
+          description: O email para login
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: A senha para login
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: string
+          headers:
+            X-Rate-Limit:
+              type: integer
+              format: int32
+              description: Chamadas por hora permitidas pelo usuário
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: data em UTC quando o token expira
+        '400':
+          description: Falha na autenticação E-mail ou senha incorreta
+  /logout:
+    get:
+      tags:
+        - Users
+      summary: Termina a sessão atual do usuário
+      description: ''
+      operationId: doLogout
+      produces:
+        - application/xml
+        - application/json
+      parameters: []
+      responses:
+        default:
+          description: Operação bem sucedida
+  /vendas/clientes/funil:
+    get:
+      summary: Lista todos os clientes cadastrados nos sistema
+      description: >
+        Trata-se do funil de vendas. Retorna um array/json com todos os clientes
+        cadastrados no sistema.
+      tags:
+        - Sales
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /vendas/clientes/tarefas:
+    get:
+      summary: Lista todas as tarefas do usurio cadastradas no sistema
+      description: >
+        Retorna um array/json com todas as tarefas do usuário cadastradas no
+        sistema.
+      tags:
+        - Sales
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /vendas/filas:
+    get:
+      summary: Lista todas as filas de clientes cadastradas no sistema
+      description: >
+        O recurso Fila de Clientes capta os leads (clientes) e distribui entre
+        as equipes de vendas.
+      tags:
+        - Sales
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  /vendas/reservas:
+    get:
+      summary: Lista todas as solicitações de reservas realizadas no sistema.
+      description: >
+        Retorna um array/json com todas as solicitações de reservas realizadas
+        no sistema.
+      tags:
+        - Sales
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  /noticias:
+    get:
+      summary: Lista todas as novidades cadastradas no sistema.
+      description: |
+        Retorna um array/json com todas as novidades do sistema.
+      tags:
+        - News
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  /noticias/categorias:
+    get:
+      summary: Lista todas as categorias referentes à novidades cadastradas no sistema.
+      description: >
+        Retorna um array/json com todas as categorias que foram criadas para
+        estabelecer um padrão de comunicação de fácil entendimento para as
+        equipes.
+      tags:
+        - News
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    post:
+      tags:
+        - Products
+      summary: Armazena um recurso recém-criado
+      description: cria um novo recurso/produto e o armazena no BD (ProductsController)
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Product'
+    get:
+      tags:
+        - Products
+      summary: Lista todas os produtos cadastrados no sistema.
+      operationId: index
+      description: >-
+        Retorna um array/json com todas os produtos de disponibilidade
+        HORIZONTAL, VERTICAL e UAU cadastrados no sistema (ProductsController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  /products/has/reserve:
+    get:
+      tags:
+        - Products
+      summary: Obtem/mostra lista de produtos com reserva ativa
+      description: Obtem/mostra lista de produtos com reserva ativa (ProductsController)
+      operationId: indexWithReserve
+      responses:
+        '200':
+          description: Operação bem sucedida
+  '/products/{id}':
+    get:
+      tags:
+        - Products
+      summary: Obtem/retorna um recurso/produto específico
+      description: Obtem/retorna Retorna o Produto pelo o ID informado (ProductsController)
+      operationId: show
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: number
+          description: O ID do produto que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Products
+      summary: Atualize o recurso/produto especificado.
+      description: Atualize os detalhes do produto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+    delete:
+      tags:
+        - Products
+      summary: Remove um produto do sistema!
+      operationId: Product_ProductsController@destroy
+      description: Remove um produto do Go Score!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  /product/type:
+    get:
+      tags:
+        - Type
+      summary: Obtem/retorna a lista dos tipos de produtos
+      operationId: Product_TypeController@index
+      description: Obtem/retorna a lista dos tipos de produtos (TypeController)
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+    post:
+      tags:
+        - Type
+      summary: Armazena um recurso recém-criado
+      operationId: Product_TypeController@store
+      description: >-
+        Cria um novo recurso/ tipo de produto e o armazena no BD
+        (TypeController)
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+  '/product/type/{id}':
+    put:
+      tags:
+        - Type
+      summary: Atualiza/update o recurso especifico no BD
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Type'
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+    delete:
+      tags:
+        - Type
+      summary: Remove o tipo de produto do sistema!
+      operationId: Product_TypeController@destroy
+      description: Remove o tipo de produto do sistema (TypeController)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Type'
+  /product/item:
+    get:
+      tags:
+        - Items
+      summary: Obtem/retorna uma lista do recurso. Items de produtos
+      operationId: Product_TypeItemsController@index
+      description: Obtem/retorna uma lista do recurso. Items de produtos
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+    post:
+      tags:
+        - Items
+      summary: Armazena um recurso recém-criado
+      operationId: Product_TypeItemsController@store
+      description: >-
+        Cria um novo recurso/ item do tipo do produto e o armazena no BD
+        (TypeController)
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+  '/product/item/{id}':
+    get:
+      tags:
+        - Items
+      summary: Obtem/retorna um recurso/item específico
+      description: Obtem/retorna Retorna o item pelo ID informado (TypeItemsController)
+      operationId: Product_TypeItemsController@show
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: number
+          description: O ID do produto que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      tags:
+        - Items
+      summary: Atualiza/update o recurso especifico no BD
+      operationId: TypeItemsController@update
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Items'
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+    delete:
+      tags:
+        - Items
+      summary: Remove o recurso/item de um produto especifico do sistema
+      operationId: TypeItemsController@destroy
+      description: >-
+        Remove o recurso/item de um produto especifico do sistema
+        (TypeItemsController)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Items'
+  '/product/items/{id_item}/filters':
+    get:
+      tags:
+        - Items
+      summary: Exibe/mostra uma listagem do recurso.
+      operationId: TypeItemsController@listToFilters
+      description: Exibe/mostra uma listagem do recurso.
+      parameters:
+        - in: path
+          name: id_item
+          required: true
+          type: number
+      responses:
+        '200':
+          description: OK
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  '/products/{id}/availability':
+    get:
+      tags:
+        - Products
+      summary: Mostra produto com disponibilidade
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: number
+          description: O ID do produto para mostrar.
+          required: true
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Product'
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  '/products/available/test/{id}':
+    get:
+      tags:
+        - Products
+      summary: Mostra o formulário para a pré edição do recurso/produto especificado.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: number
+          description: O id do produto/recurso
+          required: true
+      responses:
+        '200':
+          description: OK
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  /products/available/step1:
+    post:
+      tags:
+        - Products
+      summary: Armazena/Edita a etapa 1 de um produto (Horizontal - Vertical)
+      description: ''
+      operationId: storeStep1
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: O produto que deseja criar.
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+      responses:
+        default:
+          description: successful operation
+  '/products/available/step2/{id}':
+    post:
+      tags:
+        - Products
+      summary: Edita a etapa 2 de um produto (Horizontal - Vertical) específico
+      operationId: storeStep2
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: number
+          description: O ID do produto que deseja atualizar.
+          required: true
+      responses:
+        '200':
+          description: O produto foi atualizado com sucesso.
+          schema:
+            $ref: '#/definitions/Product'
+  '/products/available/step3/{id}':
+    post:
+      tags:
+        - Products
+      summary: Edita a etapa 3 de um produto (Horizontal - Vertical) específico
+      operationId: storeStep3
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: number
+          description: O ID do produto que deseja atualizar.
+          required: true
+      responses:
+        '200':
+          description: O produto foi atualizado com sucesso.
+          schema:
+            $ref: '#/definitions/Product'
+  '/products/download/{id}/{item}':
+    delete:
+      tags:
+        - Products
+      summary: Remove/deleta o item de download de um produto específico
+      operationId: destroyDownload
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: number
+          description: O id do produto do qual deseja deletar o item de Download
+          required: true
+        - in: path
+          name: item
+          type: number
+          description: O item o qual deseja deletar
+          required: true
+      responses:
+        '200':
+          description: O item especificado foi deletado.
+          schema:
+            $ref: '#/definitions/Error'
+  '/products/{id}/status':
+    put:
+      tags:
+        - Products
+      summary: 'Alterar/update status de um produto específico (active, inactive)'
+      description: 'Alterar/update status de um produto específico (active, inactive)'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: number
+      responses:
+        '200':
+          description: OK
+  /availability:
+    get:
+      tags:
+        - Availability
+      summary: Lista todas os recursos/disponibilidades cadastrados no sistema.
+      operationId: UnitsController@index
+      description: >-
+        Retorna um array/json com todas as disponibilidades de produtos
+        cadastrados no sistema (UnitsController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - Availability
+      summary: Armazena um recurso recém-criado
+      operationId: UnitsController@store
+      description: Cria um novo recurso/disponibilidade e o armazena no BD (TypeController)
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+  '/availability/{id}':
+    put:
+      tags:
+        - Availability
+      summary: Atualiza/update o recurso especifico no BD
+      operationId: UnitsController@update
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+    delete:
+      tags:
+        - Availability
+      summary: Remove o recurso/disponibilidade especifico do sistema
+      operationId: UnitsController@destroy
+      description: >-
+        Remove o recurso/disponibilidade especifico do sistema
+        (TypeItemsController)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Availability'
+  /availability/units:
+    get:
+      tags:
+        - Availability
+      summary: Obtém/retorna a lista situações das unidades de disponibilidade
+      operationId: UnitsController@listSituations
+      description: >-
+        Obtém/retorna a lista situações das unidades de disponibilidade
+        (UnitsController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  /availability/units/reserves:
+    get:
+      tags:
+        - Availability
+      summary: Lista todas os recursos/reservas cadastradas no sistema.
+      operationId: UnitsReservesController@index
+      description: >-
+        Lista todas os recursos/reservas cadastradas no sistema.
+        (UnitsReservesController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - Availability
+      summary: Armazena um recurso/reserva recém-criada (o)
+      operationId: UnitsReservesController@store
+      description: >-
+        Cria um novo recurso/reserva e o armazena no BD
+        (UnitsReservesController)
+      responses:
+        '200':
+          description: Reserva solicitada com sucesso
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+  '/availability/units/reserves/{id}':
+    get:
+      tags:
+        - Availability
+      summary: Obtem/retorna um recurso/reserva específico (a)
+      description: Obtem/retorna Retorna o item pelo ID informado (UnitsReservesController)
+      operationId: UnitsReservesController@show
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: number
+          description: O id do produrecurso
+          required: true
+      responses:
+        '200':
+          description: OK
+        default:
+          description: >-
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+          schema:
+            $ref: '#/definitions/Error'
+  /availability/units/search:
+    get:
+      tags:
+        - Availability
+      summary: Pesquisa unidade na disponibilidade
+      description: Pesquisa unidade na disponibilidade
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Availability'
+  /availability/units/situations:
+    get:
+      tags:
+        - Availability
+      summary: Lista situação das unidades
+      description: |
+        Lista todas as equipes criadas no sistema.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Availability'
+  /grupos/listar:
+    get:
+      summary: Lista todos os grupos
+      description: |
+        Lista todas as equipes criadas no sistema.
+      tags:
+        - Teams
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PriceEstimate'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /grupo/alto:
+    get:
+      summary: Lista todos os supervisores
+      description: |
+        Lista todos os supervisores cadastrados no sistema.
+      tags:
+        - Teams
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /grupo/medio:
+    get:
+      summary: Lista todos os gerentes
+      description: Lista todos os gerentes cadastrados no sistema.
+      tags:
+        - Teams
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /grupo/baixo:
+    get:
+      summary: Lista todos os corretores
+      description: Lista todos os corretores cadastrados no sistema.
+      tags:
+        - Teams
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /grupo/usuarios/inativos:
+    get:
+      summary: Lista todos os corretores inativos do sistema
+      description: >-
+        Se o administrador definiu no sistema que todos usuários (corretores)
+        que se cadastrarem precisam de aprovação, estes irão cair na lista de
+        inativos. Os quais só poderão ter acesso ao sistema quando o seu
+        cadastro for aprovado.
+      tags:
+        - Teams
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me:
+    get:
+      summary: User Profile
+      description: >-
+        The User Profile endpoint returns information about the Uber user that
+        has authorized with the application.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/Profile'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /history:
+    get:
+      summary: User Activity
+      description: >-
+        The User Activity endpoint returns data about a user's lifetime activity
+        with Uber. The response will include pickup locations and times, dropoff
+        locations and times, the distance of past requests, and information
+        about which products were requested.<br><br>The history array in the
+        response will have a maximum length based on the limit parameter. The
+        response value count may exceed limit, therefore subsequent API requests
+        may be necessary.
+      parameters:
+        - name: offset
+          in: query
+          type: integer
+          format: int32
+          description: Offset the list of returned results by this amount. Default is zero.
+        - name: limit
+          in: query
+          type: integer
+          format: int32
+          description: 'Number of items to retrieve. Default is 5, maximum is 100.'
+      tags:
+        - User
+      responses:
+        '200':
+          description: History information for the given user
+          schema:
+            $ref: '#/definitions/Activities'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa um produto específico.
+      name:
+        type: string
+        description: nome do produto.
+      code:
+        type: string
+        description: código do produto.
+      description:
+        type: string
+        description: Descrição do produto.
+      quantity:
+        type: integer
+        description: Quantidade do produto.
+      uf:
+        type: string
+        description: Sigla do Estado brasileiro.
+      city:
+        type: string
+        description: Cidade do Estado brasileiro.
+      cep:
+        type: string
+        description: campo CEP.
+      address:
+        type: string
+        description: Endereço.
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - active
+            - inactive
+        description: >-
+          Tem a finalidade dizer se o produto está ativo ou não no sistema. Por
+          examplo, inactive para inativo e active para ativo.
+      created_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação do cadastro
+          no sistema
+      update_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação produto no
+          sistema
+      neighborhood_id:
+        type: integer
+        description: Identificador do bairro
+      files_json:
+        type: integer
+        description: >-
+          Era aonde ficava armazenado os antigos arquivos para download do
+          produto, foi descontinuado.
+      googleMaps:
+        type: integer
+        description: 'link do mapa, do google, até então não utilizado.'
+      cover_id:
+        type: integer
+        description: Identificador da capa.
+      file_id:
+        type: integer
+        description: Identificador do arquivo.
+      availability_id:
+        type: integer
+        description: Identificador da tabela disponibilidade.
+  Type:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: >-
+          Identificador exclusivo/único que representa um tipo de produto
+          específico no BD.
+      name:
+        type: string
+        description: Nome da categoria
+      type:
+        type: string
+        description: Tipo de seleção (valor único/múltipls valores)
+      filter:
+        type: integer
+        description: Exibir filtro? (0 - Sim/ 1 - Não)
+  Items:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: >-
+          Identificador (chave primária) exclusivo/único que representa um tipo
+          de produto específico no BD.
+      name:
+        type: string
+        description: Nome do item
+      type_id:
+        type: integer
+        description: Chave primária da tabela Type
+  Availability:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: >-
+          Identificador exclusivo/único que representa uma disponibilidade
+          específica no BD.
+      name:
+        type: string
+        description: O nome da disponibilidade
+      description:
+        type: string
+        description: A descrição da disponibilidade
+      type:
+        type: number
+        description: O tipo (vertical/horizontal) da disponibilidade
+      status:
+        type: number
+        description: O status (0/1 ativa/inativa) da disponibilidade
+      file_id:
+        type: integer
+        description: id do arquivo/imagem da diponibilidade
+      observation:
+        type: string
+        description: Alguma observacão sobre a disponibilidade
+      infos:
+        type: string
+        description: Informações da disponibilidade
+      table_data:
+        type: string
+        description: XXX
+      created_at:
+        type: string
+        description: Data de criação
+      update_at:
+        type: string
+        description: Data de atualização
+  User:
+    type: object
+    properties:
+      user_id:
+        type: integer
+        description: Identificador exclusivo/único que representa um usuário específico.
+      email:
+        type: string
+        description: email do usuário.
+      password:
+        type: string
+        description: senha do usuário.
+      activated:
+        type: number
+        description: >-
+          Tem a finalidade dizer se o usuário está ativo ou não no sistema. Por
+          examplo, 0 para inativo e 1 para ativo.
+      activation_code:
+        type: string
+        description: >-
+          Tem a finalidade de especificar o código PUSH do app logado no
+          sistema.
+      last_login:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora do último login do
+          usuário pelo app no sistema.
+      persist_code:
+        type: string
+        description: XXXXXXXXXXXXXXXXXXXX
+      reset_password_code:
+        type: string
+        description: Tem a finalidade de especificar o códito de reset da senha do usuário.
+      first_name:
+        type: string
+        description: Primeiro nome do usuário.
+      last_name:
+        type: string
+        description: Último nome do usuário.
+      created_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação do cadastro
+          no sistema
+  PriceEstimate:
+    type: object
+    properties:
+      product_id:
+        type: string
+        description: >-
+          Unique identifier representing a specific product for a given latitude
+          & longitude. For example, uberX in San Francisco will have a different
+          product_id than uberX in Los Angeles
+      currency_code:
+        type: string
+        description: '[ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code.'
+      display_name:
+        type: string
+        description: Display name of product.
+      estimate:
+        type: string
+        description: >-
+          Formatted string of estimate in local currency of the start location.
+          Estimate could be a range, a single number (flat rate) or "Metered"
+          for TAXI.
+      low_estimate:
+        type: number
+        description: Lower bound of the estimated price.
+      high_estimate:
+        type: number
+        description: Upper bound of the estimated price.
+      surge_multiplier:
+        type: number
+        description: >-
+          Expected surge multiplier. Surge is active if surge_multiplier is
+          greater than 1. Price estimate already factors in the surge
+          multiplier.
+  Profile:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the Uber user.
+      last_name:
+        type: string
+        description: Last name of the Uber user.
+      email:
+        type: string
+        description: Email address of the Uber user
+      picture:
+        type: string
+        description: Image URL of the Uber user.
+      promo_code:
+        type: string
+        description: Promo code of the Uber user.
+  Activity:
+    type: object
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier for the activity
+  Activities:
+    type: object
+    properties:
+      offset:
+        type: integer
+        format: int32
+        description: Position in pagination.
+      limit:
+        type: integer
+        format: int32
+        description: Number of items to retrieve (100 max).
+      count:
+        type: integer
+        format: int32
+        description: Total number of items available.
+      history:
+        type: array
+        items:
+          $ref: '#/definitions/Activity'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
