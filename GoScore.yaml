@@ -1,0 +1,4524 @@
+swagger: '2.0'
+info:
+  title: DOCUMENTAÇÃO DA API REST Go Score!
+  description: |
+    Este documento está focado não só nas necessidades dos desenvolvedores do
+    projeto, mas também de outros participantes que desejam saber quais os parâmetros devemos passar ou quais os métodos que estão disponíveis para serem usados.
+  
+    Autenticação:
+    ==
+    Nossa autenticação é feita em 3 camadas de segurança, sendo que a segunda camada é desconsiderada quando a primeira e terceira é utilizada. 
+    - A primeira camada consiste no Token de plataforma (`goscore-token`), no qual limitamos alguns pontos e identificamos as requisições com intuito de zelar pela segurança e boa perfomance do nosso produto.
+    - A segunda camada consiste na autenticação do usuário, através do e-mail e senha (`login`, `password`) eramos um token de acesso para esse usuário que deverá ser enviado em todas as requisições subsequentes.
+    - A terceira camada consiste no valor retornado como resultado da segunda camada (`goscore-user`). 
+    
+    Em resumo, para se utilizar a plataforma é necessário ter o token de plataforma(1 camada) e token do usuário(3 camada), a segunda camada só é necessária quando você não detém os dados necessário para a terceira camada.
+    
+    Autenticação - Como obter:
+    ==
+    Nosso produto também disponibiliza um usuário de autenticação padrão para integração, as requisições feitas com estes dados de acesso serão representadas por um usuário de integração com cargo de administrador (acesso total ao sistema):
+    - Acesse: Menu Lateral (clique na sua foto de perfil) > `Configurações` > `Configurações de Integração` (No menu superior) > `Tokens de acesso para integração` > `Exibir Token de Acesso` (Botão).
+  version: 1.0.0
+  contact:
+    name:  Go Score!
+    email: sara@fastdone.com.br
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+#host: dev.goscore.com.br
+securityDefinitions:
+  apiKey: #Para definir a segurança baseada na chave da API:
+    type: apiKey
+    in: header
+    name: goscore-token
+  appId:
+    type: apiKey
+    in: header
+    name: goscore-user
+  basicAuth: #Para aplicar a autenticação básica para toda a API:
+    type: basic
+security:
+  - apiKey: []
+    appId: []
+schemes:
+  - https
+#basePath: /api/v1
+produces:
+  - application/json
+paths:
+  /products:
+    post:
+      tags:
+        - Products
+      summary: Armazena um recurso recém-criado
+      description: cria um novo recurso/produto e o armazena no BD (ProductsController)
+      operationId: ProductsController@store
+      
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/Product'
+    get:
+      tags:
+        - Products
+      summary: Lista todas os produtos cadastrados no sistema.
+      operationId: ProductsController@index
+      description: 
+        Retorna um array/json com todas os produtos de disponibilidade
+        HORIZONTAL, VERTICAL e UAU cadastrados no sistema (ProductsController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: 
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+  /products/has/reserve:
+    get:
+      tags: 
+        - Products
+      summary: Obtem/mostra lista de produtos com reserva ativa
+      description: Obtem/mostra lista de produtos com reserva ativa (ProductsController)
+      operationId: ProductsController@indexWithReserve
+      responses:
+        200:
+          description: Ok
+  '/products/{id}':
+    get:
+      tags: 
+        - Products
+      summary: Obtem/retorna um recurso/produto específico
+      description: Obtem/retorna o produto pelo o ID informado (ProductsController)
+      operationId: show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do produto que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Ops! Ocorreu um erro na sua solicitação. Desculpe-nos o transtorno.
+            Iremos corrigir para que isto não volte a acontecer e você tenha a
+            melhor experiência com o Go Score!
+    post:
+      tags:
+        - Products
+      summary: Atualiza o recurso/produto especificado.
+      operationId: ProductsController@update
+      description: Atualize os detalhes do produto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Produto atualizado com sucesso
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Products
+      summary: Remove um produto do sistema!
+      operationId: ProductsController@destroy
+      description: Remove um produto do Go Score!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error  
+  '/product/type':
+    get:
+      tags:
+        - Type
+      summary: Obtem/retorna a lista dos tipos de produtos
+      operationId: TypeController@index
+      description: Obtem/retorna a lista dos tipos de produtos (TypeController)
+      responses:
+        default:
+          description: 
+            Unexpected error
+    post:
+      tags:
+        - Type
+      summary: Armazena um recurso recém-criado
+      operationId: TypeController@store
+      description: Cria um novo recurso/ tipo de produto e o armazena no BD (TypeController)
+      responses:
+        default:
+          description: 
+            Unexpected error
+  '/product/type/{id}':
+    put:
+      tags:
+        - Type
+      summary: Atualiza/update o recurso especifico no BD
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product_Type'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Type
+      summary: Remove o tipo de produto do sistema!
+      operationId: Product_TypeController@destroy
+      description: Remove o tipo de produto do sistema (TypeController)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+          schema:
+            $ref: '#/definitions/Product_Type'
+  /product/item:
+    get:
+      tags: 
+        - Items
+      summary: Obtem/retorna uma lista do recurso. Items de produtos
+      operationId: Product_TypeItemsController@index
+      description: Obtem/retorna uma lista do recurso. Items de produtos
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Items'
+        default:
+          description: 
+            Unexpected error
+    post:
+      tags: 
+        - Items
+      summary: Armazena um recurso recém-criado 
+      operationId: Product_TypeItemsController@store
+      description: Cria um novo recurso/ item do tipo do produto e o armazena no BD (TypeController)
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Items'
+        default:
+          description: 
+            Unexpected error        
+  /product/item/{id}:
+    get:
+      tags: 
+        - Items
+      summary: Obtem/retorna um recurso/item específico
+      description: Obtem/retorna Retorna o item pelo ID informado (TypeItemsController)
+      operationId: TypeItemsController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do produto que deseja obter/pesquisar
+          required: true
+      responses:
+        '200':
+          description: Operação bem sucedida 
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Items'
+        default:
+          description: 
+            Unexpected error
+    put:
+      tags:
+        - Items
+      summary: Atualiza/update o recurso especifico no BD
+      operationId: TypeItemsController@update
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Items'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Items
+      summary: Remove o recurso/item de um produto especifico do sistema
+      operationId: TypeItemsController@destroy
+      description: Remove o recurso/item de um produto especifico do sistema (TypeItemsController)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Items'
+        default:
+          description: 
+            Unexpected error
+    
+  /product/items/{id_item}/filters:
+    get:
+      tags: 
+        - Items
+      summary: Exibe/mostra uma listagem do recurso.
+      operationId: TypeItemsController@listToFilters
+      description: Exibe/mostra uma listagem do recurso.
+      parameters: 
+        - in: path
+          name: id_item
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: 
+            Unexpected error
+  '/products/{id}/availability':
+    get:
+      tags:
+        - Products
+      summary: Mostra produto com disponibilidade
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do produto para mostrar.
+          required: true
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Product'
+        default:
+          description: >-
+            Unexpected error
+            
+  /products/available/test/{id}:
+    get:
+      tags: 
+        - Products
+      summary: Mostra o formulário para a pré edição do recurso/produto especificado.
+      produces:
+        - application/json
+      parameters: 
+        - in: path
+          name: id
+          type: integer
+          description: O id do produto/recurso
+          required: true
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: 
+            Unexpected error
+    
+  /products/available/step1:
+    post:
+      tags:
+        - Products
+      summary: Armazena/Edita a etapa 1 de um produto (Horizontal - Vertical)
+      description: ''
+      operationId: storeStep1
+      produces:
+        - application/xml
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: O produto que deseja criar.
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+      responses:
+        '200':
+          description: O produto foi atualizado com sucesso
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: 
+            Unexpected error
+  '/products/available/step2/{id}':
+    post:
+      tags:
+        - Products
+      summary: Edita a etapa 2 de um produto (Horizontal - Vertical) específico
+      operationId: storeStep2
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do produto que deseja atualizar.
+          required: true
+      responses:
+        '200':
+          description: O produto foi atualizado com sucesso
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: 
+            Unexpected error
+  '/products/available/step3/{id}':
+    post:
+      tags:
+        - Products
+      summary: Edita a etapa 3 de um produto (Horizontal - Vertical) específico
+      operationId: storeStep3
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do produto que deseja atualizar.
+          required: true
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: 
+            Unexpected error
+  '/products/download/{id}/{item}':
+    delete:
+      tags:
+        - Products
+      summary: 
+        Remove/deleta o item de download de um produto específico
+      operationId: destroyDownload
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O id do produto
+          required: true
+        - in: path
+          name: item
+          type: integer
+          description: O n'úmero do item
+          required: true
+      responses:
+        '200':
+          description: O item especificado foi deletado
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: 
+            Unexpected error
+  /products/{id}/status:
+    put:
+      tags: 
+        - Products
+      summary: Alterar/update status de um produto específico (active, inactive)
+      description: Alterar/update status de um produto específico (active, inactive)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: integer
+      responses:
+        200:
+          description: OK
+  /availability:        
+    get:
+      tags:
+        - Availability
+      summary: Lista todas os recursos/disponibilidades cadastrados no sistema.
+      operationId: UnitsController@index
+      description: 
+        Retorna um array/json com todas as disponibilidades de produtos cadastrados no sistema (UnitsController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+        default:
+          description: 
+            Unexpected error
+    post:
+      tags:
+        - Availability
+      summary: Armazena um recurso recém-criado
+      operationId: UnitsController@store
+      description: Cria um novo recurso/disponibilidade e o armazena no BD (TypeController)
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /availability/{id}:
+    put:
+      tags:
+        - Availability
+      summary: Atualiza/update o recurso especifico no BD
+      operationId: UnitsController@update
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Availability
+      summary: Remove o recurso/disponibilidade especifico do sistema
+      operationId: UnitsController@destroy
+      description: Remove o recurso/disponibilidade especifico do sistema (TypeItemsController)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+        default:
+          description: 
+            Unexpected error
+      
+  /availability/units:
+    get:
+      tags:
+        - Availability
+      summary: Obtém/retorna a lista situações das unidades de disponibilidade
+      operationId: UnitsController@listSituations
+      description: 
+        Obtém/retorna a lista situações das unidades de disponibilidade (UnitsController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+        default:
+          description: 
+            Unexpected error
+  /availability/units/reserves:
+    get:
+      tags:
+        - Availability
+      summary: Lista todas os recursos/reservas cadastradas no sistema.
+      operationId: UnitsReservesController@index
+      description: 
+        Lista todas os recursos/reservas cadastradas no sistema. (UnitsReservesController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+        default:
+          description: 
+            Unexpected error
+    post:
+      tags:
+        - Availability
+      summary: Armazena um recurso/reserva recém-criada (o)
+      operationId: UnitsReservesController@store
+      description: Cria um novo recurso/reserva e o armazena no BD (UnitsReservesController)
+      responses:
+        200:
+          description: Reserva solicitada com sucesso
+        default:
+          description: 
+            Unexpected error
+    
+  /availability/units/reserves/{id}:
+    get:
+      tags: 
+        - Availability
+      summary: Obtem/retorna um recurso/reserva específico (a)
+      description: Obtem/retorna Retorna o item pelo ID informado (UnitsReservesController)
+      operationId: UnitsReservesController@show
+      produces:
+        - application/json
+      parameters: 
+        - in: path
+          name: id
+          type: integer
+          description: O id do produrecurso
+          required: true
+      responses:
+        200:
+          description: OK
+        default:
+          description: >-
+            Unexpected error
+    put:
+      tags:
+        - Availability
+      summary: Atualiza/update o recurso especifico no BD
+      operationId: UnitsReservesController@update
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Availability'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Availability
+      summary: Remove o recurso específico do sistema!
+      operationId: UnitsReservesController@destroy
+      description: Remove o recurso específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  
+  /availability/units/search:
+    get:
+      tags: 
+        - Availability
+      summary: Pesquisa unidade na disponibilidade
+      description: Pesquisa unidade na disponibilidade
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Availability'
+            
+  /availability/units/situations:
+    get:
+      tags: 
+        - Availability
+      summary: Lista situação das unidades
+      description: |
+        Lista todas as equipes criadas no sistema.
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Availability'
+  /datatable/customers:
+    post:
+      tags:
+        - Datatables
+      summary: Monta Datatable de Lista de clientes
+      description: cria um datatable de lista de clientes (DatatableController)
+      operationId: DatatableController@customers
+      produces:
+        - application/json
+      responses:
+        default:
+          description: >-
+            Unexpected error
+  /datatable/reserves:
+    post:
+      tags:
+        - Datatables
+      summary: Monta Datatable de Lista de reservas
+      description: cria um datatable de lista de reservas (DatatableController)
+      operationId: DatatableController@reserves
+      produces:
+        - application/json
+      responses:
+        default:
+          description: >-
+            Unexpected error
+  /datatable/leads:
+    post:
+      tags:
+        - Datatables
+      summary: Monta Datatable de Lista de leads
+      description: cria um datatable de lista de leads (DatatableController)
+      operationId: DatatableController@leads
+      produces:
+        - application/json
+      responses:
+        default:
+          description: >-
+            Unexpected error
+  /datatable/task:
+    post:
+      tags:
+        - Datatables
+      summary: Monta Datatable de Lista de tarefa
+      description: cria um datatable de lista de tarefa (DatatableController)
+      operationId: DatatableController@task
+      produces:
+        - application/json
+      responses:
+        default:
+          description: >-
+            Unexpected error
+  /hook:        
+    get:
+      tags:
+        - Hook
+      summary: Lista todas os recursos
+      operationId: HookController@index
+      description: 
+        Lista todas os recursos (HookController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Hook'
+        default:
+          description: 
+            Unexpected error
+    post:
+      tags:
+        - Hook
+      summary: Armazena um recurso recém-criado
+      operationId: HookController@store
+      description: Cria um novo recurso e o armazena no BD (HookController)
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /hook/{id}:
+    put:
+      tags:
+        - Hook
+      summary: Atualiza/update o recurso especifico no BD
+      operationId: HookController@update
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Hook'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    get:
+      tags: 
+        - Hook
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (HookController)
+      operationId: HookController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    delete:
+      tags:
+        - Hook
+      summary: Remove o recurso/disponibilidade especifico do sistema
+      operationId: HookController@destroy
+      description: Remove o recurso especifico do sistema (HookController)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+          schema:
+            $ref: '#/definitions/Hook'
+  /hook/unsubscribe:
+    delete:
+      tags:
+        - Hook
+      summary: Remove/delete o recurso especificado do armazenamento por Url, passa a url como parâmetro
+      description: |
+        Remove/delete o recurso especificado do armazenamento por Url passa a url como parâmetro
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Hook'
+  /teams/all/{full}:
+    get:
+      tags:
+        - Teams
+      summary: Lista todos os grupos/equipes do usuário
+      description: |
+        Lista todos os grupos/equipes do usuário
+      operationId: TeamsMemberController@getMyTeams
+      parameters:
+        - name: full
+          in: path
+          required: true
+          type: boolean
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Teams'
+        default:
+          description: Unexpected error
+  /team/{id}/managers:
+    get:
+      tags:
+        - Teams
+      summary: Mostra a lista por Equipe - Modo Off-line
+      description: |
+        Lista todos os grupos/equipes do usuário
+      operationId: TeamsController@getRegisterList
+      parameters:
+        - name: id
+          in: path
+          description: ID
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Teams'
+        default:
+          description: Unexpected error
+  /teams/admins:
+    get:
+      tags:
+        - Teams
+      summary: Lista de Administradores do sistema
+      operationId: TeamsController@listAdmin
+      description: Lista de Administradores da equipe
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /teams/supervisors:
+    get:
+      tags:
+        - Teams
+      summary: Lista de supervisores das equipes do sistema
+      operationId: TeamsController@listSupervisors
+      description: Lista de Administradores das equipes
+      responses:
+        default:
+          description: 
+            OUnexpected error
+  /teams/managers:
+    get:
+      tags:
+        - Teams
+      summary: Lista de gerentes das equipes do sistema
+      operationId: TeamsController@listManagers
+      description: Lista de gerentes das equipes
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /teams/manager/{manager_id}/brokers:
+    get:
+      tags:
+        - Teams
+      summary: Lista todos os corretores do gerente especifico de uma equipe
+      operationId: TeamsController@managerBrokers
+      description: Lista todos os corretores do gerente especifico de uma equipe
+      parameters:
+        - name: manager_id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /teams/brokers:
+    get:
+      tags:
+        - Teams
+      summary: Lista de corretores das equipes do sistema
+      operationId: TeamsController@listBrokers
+      description: Lista de corretores das equipes
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /teams/inactives:
+    get:
+      tags:
+        - Teams
+      summary: Lista de inativos
+      operationId: TeamsMemberController@inactives
+      description: Se o administrador definiu no sistema que todos usuários (corretores)
+        que se cadastrarem precisam de aprovação, estes irão cair na lista de
+        inativos. Os quais só poderão ter acesso ao sistema quando o seu
+        cadastro for aprovado.
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /teams/newbroker:
+    post:
+      tags:
+        - Teams
+      summary: Armazena um corretor recém-criado
+      operationId: TeamsMemberController@storeBroker
+      description: Cria um novo recurso/corretor e o armazena no sistema (TeamsMemberController)
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /teams:
+    post:
+      tags:
+        - Teams
+      summary: Armazena um recurso/equipe recém-criada
+      description: cria um novo recurso/equipe e o armazena no BD (TeamsController)
+      operationId: TeamsController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Teams'
+    get:
+      tags:
+        - Teams
+      summary: Lista todas as equipes cadastradas no sistema.
+      operationId: TeamsController@index
+      description: 
+        Retorna um array/json com todas as equipes cadastrados no sistema (TeamsController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Teams'
+        default:
+          description: 
+            Unexpected error
+  /teams/{id}:
+    post:
+      tags:
+        - Teams
+      summary: Atualiza/update o recurso especifico no BD
+      operationId: TeamsController@update
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Teams'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    get:
+      tags: 
+        - Teams
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (TeamsController)
+      operationId: TeamsController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /teams/{id}/{new_group_id}:
+    delete:
+      tags:
+        - Teams
+      summary: Remove o recurso específico do sistema!
+      operationId: TeamsController@destroy
+      description: Remove o recurso específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: new_group_id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /teams/report/totalByGroup:
+    get:
+      tags:
+        - Teams
+      summary: Retorna/obtem o total de usuários (Supervisor, corretor e gerente) por grupo/perfil no sistema
+      operationId: TeamsMemberController@totalByGroup
+      description: Retorna/obtem o total de usuários (Supervisor, corretor e gerente)
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /teams/report/totalByTeam:
+    get:
+      tags:
+        - Teams
+      summary: Retorna/obtem o total de usuários (Supervisor, corretor e gerente) por equipe no sistema
+      operationId: TeamsController@totalByTeam
+      description: Retorna/obtem o total de usuários (Supervisor, corretor e gerente) por equipe
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /teams/report/total:
+    get:
+      tags:
+        - Teams
+      summary: Retorna/obtem o total de equipes no sistema
+      operationId: TeamsController@total
+      description: Retorna/obtem o total de equipes no sistema
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /teams/{id}/members/{user_group}/{user_id}:
+    delete:
+      tags:
+        - Teams
+      summary: Remove o recurso específico do sistema!
+      operationId: TeamsMemberController@destroy
+      description: Remove o recurso específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: user_group
+          in: path
+          required: true
+          type: string
+        - name: user_id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /teams/{id}/members/:
+    post:
+      tags:
+        - Teams
+      summary: Armazena um recurso recém-criado no sistema
+      operationId: TeamsMemberController@store
+      description: Armazena um recurso recém-criado no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        default:
+          description:
+            Unexpected error
+  /teams/{id}/members/{user_group}/{user_id}/{new_manager_id}:
+    delete:
+      tags:
+        - Teams
+      summary: Remove o recurso específico do sistema!
+      #operationId: TeamsMemberController@destroy
+      description: Remove o recurso específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: user_group
+          in: path
+          required: true
+          type: string
+        - name: user_id
+          in: path
+          required: true
+          type: integer
+        - name: new_manager_id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /awards/payments/{id_user}:
+    get:
+      tags:
+        - Awards
+      summary: Lista de compras do usuário
+      operationId: AwardsController@payments
+      description: Lista de compras do usuário
+      parameters:
+        - name: id_user
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /awards/redemptions/{status}:
+    get:
+      tags:
+        - Awards
+      summary: Lista todos os resgates
+      operationId: AwardsController@allRedemptions
+      description: Lista todos os resgates
+      parameters:
+        - name: status
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /awards/redemption/{id_redemption}/{status}:
+    put:
+      tags:
+        - Awards
+      summary: Alterar status do resgate
+      operationId: AwardsController@redemptionChangeStatus
+      description: Alterar status do resgate
+      parameters:
+        - name: status
+          in: path
+          required: true
+          type: integer
+        - name: id_redemption
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /awards/redemption/{id_redemption}/cancel:
+    delete:
+      tags:
+        - Awards
+      summary: Cancelar pagamento
+      operationId: AwardsController@reversePay
+      description: Cancelar pagamento
+      parameters:
+        - name: id_redemption
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /awards/pay/{id_award}:
+    put:
+      tags:
+        - Awards
+      summary: Solicitar Prêmio
+      operationId: AwardsController@payAward
+      description: Solicitar Prêmio
+      parameters:
+        - name: id_award
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error 
+  /awards/{id}/status:
+     put:
+      tags:
+        - Awards
+      summary: Alterar status do prêmio (ativo/inativo)
+      operationId: AwardsController@toggleStatus
+      description: Alterar status do prêmio
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /awards/{id}:
+    get:
+      tags: 
+        - Awards
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (AwardsController)
+      operationId: AwardsController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - Awards
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: AwardsController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Awards'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Awards
+      summary: Remove um prêmio específico do sistema!
+      operationId: AwardsController@destroy
+      description: Remove um prêmio específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /awards:
+    post:
+      tags:
+        - Awards
+      summary: Armazena um recurso recém-criado
+      description: cria um novo recurso e o armazena no sistema (AwardsController)
+      operationId: AwardsController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Awards'
+    get:
+      tags:
+        - Awards
+      summary: Lista todas os prêmios cadastradas no sistema.
+      operationId: AwardsController@index
+      description: 
+        Retorna um array/json com todas os prêmios cadastrados no sistema (AwardsController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Awards'
+        default:
+          description: 
+            Unexpected error
+  /balances/value/user/{id_user}:
+    get:
+      tags:
+        - Balance
+      summary: Pega valor do saldo do usuário
+      operationId: BalancesController@getValue
+      description: Pega valor do saldo do usuário
+      parameters:
+        - name: id_user
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /balances/value/my:
+    get:
+      tags:
+        - Balance
+      summary: Pega o valor do seu saldo
+      #operationId: BalancesController@getValue
+      description: Pega o valor do seu saldo
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /balances/history:
+    get:
+      tags:
+        - Balance
+      summary: Obtem/retorna uma lista com o histórico de saldos/transações realizadas
+      operationId: BalancesController@history
+      description: Obtem/retorna uma lista com o histórico de saldos/transações realizadas
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /balances/user/{id_user}:
+    put:
+      tags:
+        - Balance
+      summary: Armazena o valor para o usuário gerente
+      operationId: BalancesController@storeUserWithManager
+      description: Armazena o valor para o usuário gerente
+      parameters:
+        - name: id_user
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+           Unexpected error
+  /balances/users:
+    post:
+      tags:
+        - Balance
+      summary: Armazena um valor para vários usuários
+      description: Armazena um valor para vários usuários (BalancesController)
+      operationId: BalancesController@storeList
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Balance'
+  /balances:
+    get:
+      tags:
+        - Balance
+      summary: Lista todas os recursos
+      operationId: BalancesController@index
+      description: 
+        Lista todas os recursos (BalancesController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Balance'
+        default:
+          description: 
+            Unexpected error
+    post:
+      tags:
+        - Balance
+      summary: Armazena um recurso recém-criado
+      operationId: BalancesController@store
+      description: Cria um novo recurso e o armazena (BalancesController)
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /users/groups:
+    get:
+      summary: Lista todos os grupos de usuários
+      operationId: UsersController@listGroups
+      description: |
+        retorna um array/json com todos os grpos de usuários do Go Score!
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+        default:
+          description: 
+            Unexpected error
+  /users/search:
+    get:
+      tags:
+        - Users
+      summary: Perquisa por usuários
+      operationId: UsersController@searchUser
+      description: 
+        Perquisa por usuários (UsersController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+        default:
+          description: 
+            Unexpected error
+  /users/phoneRegister:
+    put:
+      tags:
+        - Users
+      summary: Registrar/ atualizar dispositivo (activation_code)
+      operationId: UsersController@registerMobile
+      description: Registrar/ atualizar dispositivo (activation_code)
+      parameters:
+        - name: body
+          in: body
+          description: O conteúdo da solicitação 
+          schema:
+            type: object
+            properties:
+              activation_code:
+                description: Código push do dispositivo 
+                type: string
+              date_update:
+                description: data de atualização 2017-03-03T10:14:06:59
+                type: string
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /users/me:
+     get:
+      tags:
+        - Users
+      summary: Obtem meu usuário para edição
+      operationId: UsersController@editMe
+      description: 
+        Obtem meu usuário para edição (UsersController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+        default:
+          description: 
+            Unexpected error
+  /users/me/team:
+    get:
+      tags:
+        - Users
+      summary: Obtem minha equipe
+      operationId: UsersController@myTeam
+      description: 
+        Obtem minha equipe (UsersController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+        default:
+          description: 
+            Unexpected error
+  /users/{user_id}/redemptions:
+    get:
+      tags:
+        - Users
+      summary: Pega todos os resgates por usuário
+      operationId: AwardsController@allRedemptionsByUser
+      description: Pega todos os resgates por usuário
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+
+  /users/{user_id}/favorite:
+    put:
+      tags:
+        - Users
+      summary: Mudar usuário para favorito 
+      operationId: UsersController@favorite
+      description: Mudar usuário para favorito
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /users/report/totalByOrigin:
+    get:
+      tags:
+        - Users
+      summary: Obtem total de usuário por Origem
+      operationId: UsersController@usersByOrigin
+      description: 
+        Obtem total de usuário por Origem
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+        default:
+          description: 
+            Unexpected error
+  /users/report/{year}/{group}:
+    get:
+      tags:
+        - Users
+      summary: Obtem relatório de usuários por ano
+      operationId: UsersController@report
+      description: Obtem relatório de usuários por ano
+      parameters:
+        - name: year
+          in: path
+          required: true
+          type: integer
+        - name: group
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /users/push/{email}/{sendMail}:
+    get:
+      tags:
+        - Users
+      summary: Teste de notificação Push para o e-mail
+      operationId: UsersController@testNotify
+      description: Teste de notificação Push para o e-mail
+      parameters:
+        - name: email
+          in: path
+          required: true
+          type: string
+        - name: sendMail
+          in: path
+          required: true
+          type: boolean
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /users:
+    post:
+      tags:
+        - Users
+      summary: Armazena um recurso recém-criado
+      description: cria um novo recurso e o armazena no sistema (UsersController)
+      operationId: UsersController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Users'
+    get:
+      tags:
+        - Users
+      summary: Lista todas os prêmios cadastradas no sistema.
+      operationId: UsersController@index
+      description: 
+        Retorna um array/json com todas os prêmios cadastrados no sistema (UsersController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+        default:
+          description: 
+            Unexpected error
+  /users/{id}:
+    post:
+      tags:
+        - Users
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: UsersController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    get:
+      tags: 
+        - Users
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (TeamsController)
+      operationId: UsersController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    delete:
+      tags:
+        - Users
+      summary: Remove um usuário do sistema!
+      operationId: UsersController@destroy
+      description: Remove um usuário do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /companies:
+    post:
+      tags:
+        - Companies
+      summary: Armazena um recurso recém-criado
+      description: cria um novo recurso e o armazena no sistema (CompaniesController)
+      operationId: CompaniesController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Users'
+    get:
+      tags:
+        - Companies
+      summary: Lista todas as companhias cadastradas no sistema.
+      operationId: CompaniesController@index
+      description: 
+        Retorna um array/json com todas os prêmios cadastrados no sistema (CompaniesController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Users'
+        default:
+          description: 
+            Unexpected error
+  /companies/{id}:
+    post:
+      tags:
+        - Companies
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: CompaniesController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Companies'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    get:
+      tags: 
+        - Companies
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (CompaniesController)
+      operationId: CompaniesController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    delete:
+      tags:
+        - Companies
+      summary: Remove uma companhia do sistema!
+      operationId: CompaniesController@destroy
+      description: Remove uma companhia do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /agenda:
+    post:
+      tags: 
+        - Agenda
+      summary: Armazena um recurso recém-criado 
+      operationId: AgendaController@store
+      description: Cria um novo recurso/ iagenda e a armazena no sistema (AgendaController)
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Agenda'
+        default:
+          description: 
+            Unexpected error
+  /agenda/{id_agenda}:
+    post:
+      tags:
+        - Agenda
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: AgendaController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id_agenda
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Agenda'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    get:
+      tags: 
+        - Agenda
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (AgendaController)
+      operationId: AgendaController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id_agenda
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    delete:
+      tags:
+        - Agenda
+      summary: Remove uma agenda do sistema!
+      operationId: AgendaController@destroy
+      description: Remove uma agenda do sistema!
+      parameters:
+        - name: id_agenda
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /agenda/{id}/presence:
+    put:
+      tags:
+        - Agenda
+      summary: Alterar presença de uma agenda em especóifico
+      operationId: AgendaController@presence
+      description: Alterar presença de uma agenda em especóifico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /places:
+    post:
+      tags:
+        - Places
+      summary: Armazena um recurso recém-criado
+      description: cria um novo recurso e o armazena no sistema (PlacesController)
+      operationId: PlacesController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Places'
+    get:
+      tags:
+        - Places
+      summary: Lista todas as companhias cadastradas no sistema.
+      operationId: PlacesController@index
+      description: 
+        Retorna um array/json com todas os prêmios cadastrados no sistema (PlacesController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Places'
+        default:
+          description: 
+            Unexpected error
+  /places/{id}:
+    put:
+      tags:
+        - Places
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: PlacesController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Places'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    get:
+      tags: 
+        - Places
+      summary: Obtem/retorna um recurso/lugar específico
+      description: Obtem/retorna o lugar pelo o ID informado (PlacesController)
+      operationId: PlacesController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    delete:
+      tags:
+        - Places
+      summary: Remove o recurso/disponibilidade especifico do sistema
+      operationId: PlacesController@destroy
+      description: Remove o recurso especifico do sistema (HookController)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+          schema:
+            $ref: '#/definitions/Places'
+  /places/{id}/status:
+    put:
+      tags:
+        - Places
+      summary: Alterar status do recurso (ativo/inativo)
+      operationId: PlacesController@toggleStatus
+      description: Alterar status do recurso (ativo/inativo)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /customers:
+    post:
+      tags:
+        - Customers
+      summary: Armazena um recurso recém-criado
+      description: cria um novo recurso e o armazena no sistema (Customer_MainController)
+      operationId: Customer_MainController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Customers'
+    get:
+      tags:
+        - Customers
+      summary: Lista todos os clientes cadastradas no sistema.
+      operationId: Customer_MainController@index
+      description: 
+        Retorna um array/json com todos os clientes cadastrados no sistema (Customer_MainController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Customers'
+        default:
+          description: 
+            Unexpected error
+  /customers/{id}:
+    get:
+      tags: 
+        - Customers
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (Customer_MainController)
+      operationId: Customer_MainController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - Customers
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: Customer_MainController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Customers'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Customers
+      summary: Remove um cliente específico do sistema!
+      operationId: Customer_MainController@destroy
+      description: Remove um cliente específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /customers/favorite/{id_customer}:
+    put:
+      tags:
+        - Customers
+      summary: Mudar cliente para favorito 
+      operationId: Customer_MainController@favorite
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id_customer
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Customers'
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /avatar/{id_customer}/{mode}:
+    put:
+      tags:
+        - Customers
+      summary: XX
+      operationId: Customer_MainController@avatar
+      description: XX
+      parameters:
+        - name: id_customer
+          in: path
+          required: true
+          type: integer
+        - name: mode
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Customers'
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /customer/historical:
+    post:
+      tags:
+        - Customers_Historical
+      summary: Armazena um recurso recém-criado
+      description: cria um novo recurso e o armazena no sistema (HistoricalController)
+      operationId: HistoricalController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            $ref: '#/definitions/Customers_Historical'
+    get:
+      tags:
+        - Customers_Historical
+      summary: Lista todos os clientes cadastradas no sistema.
+      operationId: HistoricalController@index
+      description: 
+        Retorna um array/json com todos os clientes cadastrados no sistema (HistoricalController).
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Customers_Historical'
+        default:
+          description: 
+            Unexpected error
+  /customer/historical/{id}:
+    get:
+      tags: 
+        - Customers_Historical
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (HistoricalController)
+      operationId: HistoricalController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - Customers_Historical
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: HistoricalController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Customers_Historical'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Customers_Historical
+      summary: Remove um cliente específico do sistema!
+      operationId: HistoricalController@destroy
+      description: Remove um cliente específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /task/types:
+    get:
+      tags:
+        - Task
+      summary: Lista todos os tipos de tarefas cadastradas no sistema.
+      operationId: Task_MainController@types
+      description: 
+        Retorna um array/json com todos as tarefas cadastrados no sistema (Task_MainController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Task'
+        default:
+          description: 
+            Unexpected error
+  /task/{id}:
+    get:
+      tags: 
+        - Task
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (Customer_MainController)
+      operationId: Task_MainController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - Task
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: Task_MainController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Task'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Task
+      summary: Remove um cliente específico do sistema!
+      operationId: Task_MainController@destroy
+      description: Remove um cliente específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /task/{id_task}/status:
+    put:
+      tags:
+        - Task
+      summary: Atualiza/update tarefa fechada
+      description: Atualiza/update o recurso especifico no BD
+      parameters:
+        - name: id_task
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Task'
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /leads:
+    post:
+      tags:
+        - Leads
+      summary: Armazena um recurso recém-criado
+      description: Cria um novo recurso e o armazena no sistema (LeadsController)
+      operationId: LeadsController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Leads'
+    get:
+      tags:
+        - Leads
+      summary: Lista todas os recursos cadastradas no sistema.
+      operationId: LeadsController@index
+      description: 
+        Retorna um array/json com todas os recursos cadastrados no sistema (LeadsController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Leads'
+        default:
+          description: 
+            Unexpected error
+  /leads/{id}:
+    get:
+      tags: 
+        - Leads
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (LeadsController)
+      operationId: LeadsController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - Leads
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: LeadsController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Leads'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Leads
+      summary: Remove um lead específico do sistema!
+      operationId: LeadsController@destroy
+      description: Remove um lead específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /leads/{id_lead}/users:
+    get:
+      tags:
+        - Leads
+      summary: Lista todos os usuários  de uma fila específica.
+      operationId: LeadsController@listUsersFromQueue
+      description: 
+        Retorna um array/json com todas usuários cadastrados no sistema (LeadsController).
+      parameters:
+        - name: id_lead
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Leads'
+        default:
+          description: 
+            Unexpected error
+    post:
+      tags:
+        - Leads
+      summary: Insere um usuário em uma fila específica
+      operationId: LeadsController@addUsersOnQueue
+      description: Insere um usuário na fila
+      parameters:
+        - name: id_lead
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Leads'
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Leads
+      summary: Remove um usuário de uma fila específica
+      operationId: LeadsController@removeUsersFromQueue
+      description: Remove um lead específico do sistema!
+      parameters:
+        - name: id_lead
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /leads/{id_lead}/neworder:
+    put:
+      tags:
+        - Leads
+      summary: Move usuário na fila
+      operationId: LeadsController@moveUser
+      description: move usuário na fila
+      parameters:
+        - name: id_lead
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Leads'
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /leads/execute/{id_lead}:
+    post:
+      tags:
+        - Leads
+      summary: Processa fila
+      operationId: LeadsController@processQueue
+      description: Processa fila
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id_lead
+          type: integer
+          description: O ID do lead.
+          required: true
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Leads'
+        default:
+          description: 
+            Unexpected error
+  /leads/history/{id_lead}:
+    get:
+      tags:
+        - Leads
+      summary: Mostra histórico
+      operationId: LeadsController@listHistory
+      description: 
+        Mostra histórico
+      parameters:
+        - name: id_lead
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Leads'
+        default:
+          description: 
+            Unexpected error
+  /leadsDates:
+    get:
+      tags: 
+        - Leads
+      summary: Obtem/retorna todas as datas em uso
+      operationId: LeadsController@getAllDatesUse
+      description: Obtem/retorna todas as datas em uso
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Leads'
+        default:
+          description: 
+            Unexpected error
+  /news/category/{all}:
+    get:
+      tags:
+        - News
+      summary: Mostra uma lista de todas as categorias de novidades cadastradas no sistema. Passa como parâmetro a variável booleana "all"
+      operationId: NewsCategoryController@index
+      description: 
+        Mostra uma lista de todas as categorias de novidades cadastradas no sistema
+      parameters:
+        - name: all
+          in: path
+          required: true
+          type: boolean
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/News'
+        default:
+          description: 
+            Unexpected error
+  /news/category:
+    post:
+      tags:
+        - News
+      summary: Armazena um recurso recém-criado
+      description: Cria um novo recurso e o armazena no sistema (NewsCategoryController)
+      operationId: NewsCategoryController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/News'
+  /news/category/{id}:
+    put:
+      tags:
+        - News
+      summary: Atualiza/update o recurso especifico no sistema
+      operationId: NewsCategoryController@update
+      description: Atualiza/update o recurso especifico no sistema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/News'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    get:
+      tags:
+        - News
+      summary: Obtem/Mostra o formulário para editar o recurso especificado.
+      operationId: NewsCategoryController@edit
+      description: Mostra o formulário para editar o recurso especificado.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/News'
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - News
+      summary: Remove uma novidade específica do sistema.
+      operationId: NewsCategoryController@destroy
+      description: Remove uma novidade específica do sistema.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /news:
+    post:
+      tags:
+        - News
+      summary: Armazena um recurso recém-criado
+      description: cria um novo recurso/novidade e o armazena no sistema (NewsController)
+      operationId: NewsController@store
+      
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/News'
+    get:
+      tags:
+        - News
+      summary: Lista todas as novidades cadastradas no sistema.
+      operationId: NewsController@index
+      description: 
+        Lista todas as novidades cadastradas no sistema. (NewsController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/News'
+        default:
+          description: 
+            Unexpected error
+  /news/{id}:
+    get:
+      tags: 
+        - News
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna uma novidade pelo o ID informado (NewsController)
+      operationId: NewsController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID da novidade
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - News
+      summary: Atualizar o recurso especificado.
+      operationId: NewsController@update
+      description: Atualizar o recurso especificado.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/News'
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - News
+      summary: Remove um recurso específico do sistema!
+      operationId: NewsController@destroy
+      description: Remove um recurso específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /news/{id}/status:
+    put:
+      tags:
+        - News
+      summary: Alterar status da novidade (ativo/inativo)
+      operationId: NewsController@toggleStatus
+      description: Alterar status da novidade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /news/{category_id}/category:
+    get:
+      tags: 
+        - News
+      summary: Obtem/retorna novidades por uma categooria específica
+      operationId: NewsController@newsByCategory
+      description: Obtem/retorna uma novidade pelo o ID informado (NewsController)
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: category_id
+          type: integer
+          description: O ID da categoria
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /notification/noRead:
+    get:
+      tags:
+        - Notifications
+      summary: Obtém/retorna a lista de notificações sem leitura
+      operationId: NotificationController@listNoRead
+      description: 
+        Obtém/retorna a lista de notificações sem leitura (NotificationController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Notifications'
+        default:
+          description: 
+            Unexpected error
+  /notification/totalNoRead:
+    get:
+      tags:
+        - Notifications
+      summary: Obtém/retorna o total/quantidade de notificações sem leitura
+      operationId: NotificationController@totalNoRead
+      description: 
+        Obtém/retorna o total/quantidade de notificações sem leitura (NotificationController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Notifications'
+        default:
+          description: 
+            Unexpected error
+  /notification/markAllRead:
+    put:
+      tags:
+        - Notifications
+      summary: Marca todas as notificações como lida (NotificationController)
+      operationId: NotificationController@markAllRead
+      description: Marca todas as notificações como lida (NotificationController) 
+      responses:
+        default:
+          description: 
+            Unexpected error
+  /notification/destroy:
+    post:
+      tags:
+        - Notifications
+      summary: Remove notificação
+      operationId: NotificationController@destroy
+      description: Remove notificação (NotificationController)
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/Notifications'
+  /notificationAmount/{new}:
+    get:
+      tags: 
+        - Notifications
+      summary: Obtem/retorna uma lista de todas as notificações "não vistas"  e "vistas"
+      description: Obtem/retorna uma lista de todas as notificações "não vistas"  e "vistas" (NotificationController)
+      operationId: NotificationController@listAmount
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: new
+          type: boolean
+          description: O ID do produto que deseja obter/pesquisar
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /notification:
+    get:
+      tags:
+        - Notifications
+      summary: Retorna todas as notificações 
+      operationId: NotificationController@index
+      description: 
+        Retorna todas as notificações (NotificationController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Notifications'
+        default:
+          description: 
+            Unexpected error
+  /files:
+    post:
+      tags:
+        - Files
+      summary: Armazena um recurso recém-criado. Cria um novo arquivo
+      description: Cria um novo recurso e o armazena no sistema (FilesController)
+      operationId: FilesController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Files'
+    get:
+      tags:
+        - Files
+      summary: Lista todas os arquivos cadastrados no sistema.
+      operationId: FilesController@index
+      description: 
+        Retorna um array/json com todas os recursos cadastrados no sistema (FilesController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Files'
+        default:
+          description: 
+            Unexpected error
+  /files/{id}:
+    get:
+      tags: 
+        - Files
+      summary: Obtem/retorna um recurso/arquivo específico
+      description: Obtem/retorna o arquivo pelo o ID informado (FilesController)
+      operationId: FilesController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do arquivo/recurso 
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - Files
+      summary: Atualiza o recurso/arquivo especificado.
+      operationId: FilesController@update
+      description: Atualiza o recurso/arquivo especificado.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: string
+            items:
+              $ref: '#/definitions/Files'
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Files
+      summary: Remove um arquivo específico do sistema. MAnda para a lixeira!
+      operationId: FilesController@destroy
+      description: Remove um arquivo específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /files/destroyforce:
+    delete:
+      tags:
+        - Files
+      summary: Remove permanentemente todos os item da lixeira
+      operationId: FilesController@destroyTrashed
+      description: Remove permanentemente todos os item da lixeira
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /galleries:
+    post:
+      tags:
+        - Galleries
+      summary: Armazena um recurso recém-criado. Cria uma galeria
+      description: Cria um novo recurso e o armazena no sistema (GalleriesController)
+      operationId: GalleriesController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Galleries'
+    get:
+      tags:
+        - Galleries
+      summary: Lista todas os arquivos cadastrados no sistema.
+      operationId: GalleriesController@index
+      description: 
+        Retorna todos os recursos cadastrados no sistema (GalleriesController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Galleries'
+        default:
+          description: 
+            Unexpected error
+  /galleries/{id}:
+    get:
+      tags: 
+        - Galleries
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (GalleriesController)
+      operationId: GalleriesController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso 
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - Galleries
+      summary: Atualiza o recurso especificado.
+      operationId: GalleriesController@update
+      description: Atualiza o recurso/arquivo especificado.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: string
+            items:
+              $ref: '#/definitions/Galleries'
+        default:
+          description: 
+            Unexpected error
+  /tags:
+    post:
+      tags:
+        - Tags
+      summary: Armazena um recurso recém-criado.
+      description: Cria um novo recurso e o armazena no sistema (Tags_MainController)
+      operationId: Tags_MainController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Tags'
+    get:
+      tags:
+        - Tags
+      summary: Lista todas os recursos cadastrados no sistema.
+      operationId: Tags_MainController@index
+      description: 
+        Retorna um json com todas os recursos cadastrados no sistema (Tags_MainController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tags'
+        default:
+          description: 
+            Unexpected error
+  /tags/{id}:
+    get:
+      tags: 
+        - Tags
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (Tags_MainController)
+      operationId: Tags_MainController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso 
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - Tags
+      summary: Atualiza o recurso especificado.
+      operationId: Tags_MainController@update
+      description: Atualiza o recurso especificado.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: string
+            items:
+              $ref: '#/definitions/Tags'
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Tags
+      summary: Remove um recurso específico do sistema. Manda para a lixeira!
+      operationId: Tags_MainController@destroy
+      description: Remove um recurso específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /tags-category:
+    post:
+      tags:
+        - Tags_Category
+      summary: Armazena um recurso recém-criado.
+      description: Cria um novo recurso e o armazena no sistema (Tags_MainController)
+      operationId: Tags_CategoryController@store
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Tags_Category'
+    get:
+      tags:
+        - Tags_Category
+      summary: Lista todas os recursos cadastrados no sistema.
+      operationId: Tags_CategoryController@index
+      description: 
+        Retorna um json com todas os recursos cadastrados no sistema (Tags_MainController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tags_Category'
+        default:
+          description: 
+            Unexpected error
+  /tags-category/{id}/{withTags}:
+    get:
+      tags: 
+        - Tags_Category
+      summary: Obtem/retorna um recurso específico
+      description: Obtem/retorna o recurso pelo o ID informado (Tags_CategoryController)
+      operationId: Tags_CategoryController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso 
+          required: true
+        - name: withTags
+          in: path
+          description: Com tags?
+          required: true
+          type: boolean
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /tags-category/tags:
+    get:
+      tags:
+        - Tags_Category
+      summary: Lista todos os recursos/categorias com tags cadastrados no sistema.
+      operationId: Tags_CategoryController@indexWithTags
+      description: 
+        Retorna um json com todas os recursos cadastrados no sistema (Tags_CategoryController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tags_Category'
+        default:
+          description: 
+            Unexpected error
+    
+  /tags-category/{id}:
+    post:
+      tags:
+        - Tags_Category
+      summary: Atualiza o recurso especificado.
+      operationId: Tags_CategoryController@update
+      description: Atualiza o recurso especificado.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: string
+            items:
+              $ref: '#/definitions/Tags_Category'
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Tags_Category
+      summary: Remove um recurso específico do sistema. Manda para a lixeira!
+      operationId: Tags_CategoryController@destroy
+      description: Remove um recurso específico do sistema!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error
+    get:
+      tags:
+        - Tags_Category
+      summary: Obtem/Mostra o formulário para editar o recurso especificado.
+      operationId: Tags_CategoryController@edit
+      description: Mostra o formulário para editar o recurso especificado.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tags_Category'
+        default:
+          description: 
+            Unexpected error
+  /configuration/colors:
+    put:
+      tags:
+        - Configurations
+      summary: Define as variáveis que representa as cores do painel web dos clientes
+      operationId: ConfigurationsController@colors
+      description: Define as variáveis que representa as cores do painel web dos clientes (ConfigurationsController)
+      parameters:
+        - name: body
+          in: body
+          description: O conteúdo da solicitação
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Configurations'
+      responses:
+        default:
+          description: 
+            Unexpected error
+    get:
+      tags:
+        - Configurations
+      summary: Executa as cores do painel web dos clientes
+      operationId: ConfigurationsController@runColors
+      description: 
+        Executa as cores do painel web dos clientes (ConfigurationsController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Configurations'
+        default:
+          description: 
+            Unexpected error
+  /configuration/{field}:
+    post:
+      tags:
+        - Configurations
+      summary: Atualiza o recurso/logo
+      operationId: ConfigurationsController@update
+      description: Atualiza o recurso/logo
+      parameters:
+        - name: field
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Configurations'
+        default:
+          description: 
+            Unexpected error
+  /configuration:
+    get:
+      tags:
+        - Configurations
+      summary: Lista todas os configuracões existentes no sistema.
+      operationId: ConfigurationsController@index
+      description: 
+        Lista todas os configuracões existentes no sistema. (ConfigurationsController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Configurations'
+        default:
+          description: 
+            Unexpected error
+  /configuration/{name}/{json}:
+    get:
+      tags: 
+        - Configurations
+      summary: Obtem/retorna um recurso/produto específico
+      description: Obtem/retorna o produto pelo o ID informado (ConfigurationsController)
+      operationId: ConfigurationsController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: name
+          type: string
+          required: true
+        - in: path
+          name: json
+          type: boolean
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /configs/alerts:
+    get:
+      tags:
+        - Configurations
+      summary: Exibe uma listagem do recurso
+      operationId: Config_AlertController@index
+      description: 
+        Exibe uma listagem do recurso
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Configurations'
+        default:
+          description: 
+            Unexpected error
+  /configs/alerts/{alert}:
+    get:
+      tags:
+        - Configurations
+      summary: Exibe uma listagem do recurso por alertas
+      operationId: Config_AlertController@listByAlert
+      description: 
+        Exibe uma listagem do recurso por alertas
+      parameters:
+        - in: path
+          name: alert
+          type: string
+          required: true
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Configurations'
+        default:
+          description: 
+            Unexpected error
+  /configs/mail:
+    post:
+      tags: 
+        - Configurations
+      summary: Ajusta o domíneo de configuraçãoes diretamenta da AMAZON
+      operationId: ConfigurationsController@configMail
+      description: Ajusta o domíneo de configuraçãoes diretamenta da AMAZON (ConfigurationsController)
+      responses:
+        '200':
+          description: Operação bem sucedida
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Configurations'
+        default:
+          description: 
+            Unexpected error
+  /tokens/integration:
+    get:
+      tags:
+        - Tokens
+      summary: Mostrar token de integracção
+      operationId: System_TokensApiController@showIntegrationToken
+      description: Mostrar token de integracção
+      responses:
+        default:
+          description: Unexpected error
+  /tokens:
+    post:
+      tags:
+        - Tokens
+      summary: Armazena um recurso recém-criado
+      description: cria um recurso e o armazena (System_TokensApiController)
+      operationId: System_TokensApiController@store
+      
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/Tokens'
+    get:
+      tags:
+        - Tokens
+      summary: Lista todos os recursos amazenados.
+      operationId: System_TokensApiController@index
+      description: 
+        Lista todos os recursos amazenados. (System_TokensApiController).
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tokens'
+        default:
+          description: 
+            Unexpected error
+  /tokens/{id}:
+    get:
+      tags: 
+        - Tokens
+      summary: Obtem/retorna um recurso específico
+      description: Retorna o recurso pelo o ID informado (System_TokensApiController)
+      operationId: System_TokensApiController@show
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID do recurso
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+    post:
+      tags:
+        - Tokens
+      summary: Atualiza o recurso especificado.
+      operationId: System_TokensApiController@update
+      description: Atualiza o recurso especificado.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tokens'
+        default:
+          description: 
+            Unexpected error
+    delete:
+      tags:
+        - Tokens
+      summary: Remove um recurso do sistema!
+      operationId: System_TokensApiController@destroy
+      description: Remove um produto do Go Score!
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        default:
+          description:  
+            Unexpected error  
+  /integrations/uau/status:
+    get:
+      tags:
+        - Integrations
+      summary: Checa status da integracçãoão UAU
+      operationId: IntegrationsController@uauStatus
+      description: Checa status da integracçãoão UAU
+      responses:
+        default:
+          description: Unexpected error
+  /integrations/uau/products:
+    get:
+      tags:
+        - Integrations
+      summary: Lista produtos cadastrados no UAU
+      operationId: IntegrationsController@uauProducts
+      description: Lista produtos UAU
+      responses:
+        default:
+          description: Unexpected error
+  /integrations/uau/mirror/{id_product}:
+    get:
+      tags: 
+        - Integrations
+      summary: Ler espelho especíco UAU
+      description: Ler espelho especíco UAU (IntegrationsController)
+      operationId: IntegrationsController@uauMirror
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id_product
+          type: integer
+          description: O ID do produto 
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /integrations/uau/mirror/{id_product}/vertical:
+    get:
+      tags: 
+        - Integrations
+      summary: Obtem espelho especíco UAU - Vertical
+      description: Ler espelho especíco UAU (IntegrationsController)
+      operationId: IntegrationsController@uauMirrorVertical
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id_product
+          type: integer
+          description: O ID do produto 
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /api/v1/offline/team/{id}/managers:
+    get:
+      tags: 
+        - Teams
+      summary: Retorna a lista por Equipe, baseado no gerente - Modo Off-line
+      description: Retorna a lista por Equipe, baseado no gerente - Modo Off-line (TeamsController)
+      #operationId: TeamsController@getRegisterList
+      produces:
+        - application/json  
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          description: O ID da equipe 
+          required: true
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /api/v1/offline/teams:
+    get:
+      tags: 
+        - Teams
+      summary: Retorna a lista de equipes - Modo Off-line
+      description: Retorna a lista de equipes - Modo Off-line (TeamsController)
+      #operationId: TeamsController@getRegisterList
+      produces:
+        - application/json
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /api/v1/offline/configurations:
+    get:
+      tags: 
+        - Teams
+      summary: Lista todas os configuracões existentes no sistema - Modo Off-line
+      description: Lista todas os configuracões existentes no sistema - Modo Off-line (ConfigurationsController)
+      #operationId: TeamsController@getRegisterList
+      produces:
+        - application/json
+      responses:
+        default:
+          description:  
+            Unexpected error
+  /api/v1/offline/remember:
+    post:
+      tags: 
+        - Teams
+      summary: Lembrete de Login por E-mail - Modo Off-line
+      description: Lembrete de Login por E-mail - Modo Off-line (LoginController)
+      operationId: LoginController@reminder
+      produces:
+        - application/json
+      responses:
+        default:
+          description:  
+            Unexpected error
+    
+  
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa um produto específico.
+      name:
+        type: string
+        description: nome do produto.
+      code:
+        type: string
+        description: código do produto.
+      description:
+        type: string
+        description: Descrição do produto.
+      quantity:
+        type: integer
+        description: Quantidade do produto.
+      uf:
+        type: string
+        description: Sigla do Estado brasileiro.
+      city:
+        type: string
+        description: Cidade do Estado brasileiro.
+      cep:
+        type: string
+        description: campo CEP.
+      address:
+        type: string
+        description: Endereço.
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - active
+            - inactive
+        description: >-
+          Tem a finalidade dizer se o produto está ativo ou não no sistema. Por
+          examplo, inactive para inativo e active para ativo.
+      created_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação do cadastro
+          no sistema
+      update_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação produto no
+          sistema
+      neighborhood_id:
+        type: integer
+        description: Identificador do bairro
+      files_json:
+        type: integer
+        description: >-
+          Era aonde ficava armazenado os antigos arquivos para download do
+          produto, foi descontinuado.
+      googleMaps:
+        type: integer
+        description: 'link do mapa, do google, até então não utilizado.'
+      cover_id:
+        type: integer
+        description: Identificador da capa.
+      file_id:
+        type: integer
+        description: Identificador do arquivo.
+      availability_id:
+        type: integer
+        description: Identificador da tabela disponibilidade.
+  Product_Type:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa um tipo de produto específico no BD.
+      name: 
+        type: string
+        description: Nome da categoria
+      type:
+        type: string
+        description: Tipo de seleção (valor único/múltipls valores)      
+      filter:
+        type: integer
+        description: Exibir filtro? (0 - Sim/ 1 - Não)
+  Teams:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa uma equipe específica no BD.
+      name: 
+        type: string
+        description: Nome da equipe
+      logo:
+        type: string
+        description: Logo da equipe    
+      created_at:
+        type: string
+        description: Data de criação da equipe
+      updated_at:
+        type: string
+        description: Data de atualizacão da equipe
+      default_manager_id:
+        type: integer
+        description: Identificador exclusivo/único do gerente padrão gerado pelo sistema.
+      default_supervisor_id:
+        type: integer
+        description: Identificador exclusivo/único do supervisor padrão gerado pelo sistema.
+  Items:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador (chave primária) exclusivo/único que representa um tipo de produto específico no BD.
+      name: 
+        type: string
+        description: Nome do item
+      type_id:
+        type: integer
+        description: Chave primária da tabela Type
+  Hook:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador (chave primária) exclusivo/único que representa um hook específico no BD.
+      description: 
+        type: string
+        description: A descrição do hook
+      url:
+        type: string
+        description: A url/ página com a chave gerada
+      event:
+        type: string
+        description: O evento ocorrido
+      show:
+        type: number
+        description: ""
+      data:
+        type: string
+        description: ""
+      created_at:
+        type: string
+        description: ""
+      updated_at:
+        type: string
+        description: ""
+      deleted_at:
+        type: string
+        description: ""
+  Availability:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa uma disponibilidade específica no BD.
+      name:
+        type: string
+        description: O nome da disponibilidade
+      description: 
+        type: string
+        description: A descrição da disponibilidade
+      type:
+        type: array
+        items:
+          type: string
+          enum:
+            - horizontal
+            - vertical
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - active
+            - inactive
+      file_id:
+        type: integer
+        description: id do arquivo/imagem da diponibilidade
+      observation:
+        type: string
+        description: Alguma observacão sobre a disponibilidade
+      infos:
+        type: string
+        description: Informações da disponibilidade
+      table_data:
+        type: string
+        description: XXX
+      created_at:
+        type: string
+        description: Data de criação      
+      update_at:
+        type: string
+        description: Data de atualização   
+  Awards:
+    type: object
+    properties:
+      id_award:
+        type: integer
+        description: Identificador exclusivo/único que representa um pr6emio específica no sistema.
+      name:
+        type: string
+        description: O nome do prêmio
+      cost: 
+        type: number
+        description: Custo do prêmio
+      description:
+        type: string
+        description: Descrição do prêmio 
+      delivery:
+        type: string
+        description: informação sobre a entrega do prêmio 
+      status:
+        type: number
+        description: O status (0/1 ativa/inativa) da disponibilidade
+  Balance:
+    type: object
+    properties:
+      id_balance:
+        type: integer
+        description: Identificador exclusivo/único que representa um saldo específica.
+      user_id:
+        type: integer
+        description: Chave primária da tabela User
+      type: 
+        type: number
+        description: tipo de saldo (0/1 crédito/débito)
+      value:
+        type: string
+        description: Valor do saldo (0/1 crédito/débito)
+      validate:
+        type: string
+        description: Data de validação do saldo
+  Users:
+    type: object
+    properties:
+      user_id:
+        type: integer
+        description: Identificador exclusivo/único que representa um usuário específico.
+      email:
+        type: string
+        description: email do usuário.
+      password:
+        type: string
+        description: senha do usuário.
+      activated:
+        type: number
+        description: >-
+          Tem a finalidade dizer se o usuário está ativo ou não no sistema. Por
+          examplo, 0 para inativo e 1 para ativo.
+      activation_code:
+        type: string
+        description: >-
+          Tem a finalidade de especificar o código PUSH do app logado no
+          sistema.
+      last_login:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora do último login do
+          usuário pelo app no sistema.
+      persist_code:
+        type: string
+        description: XXXXXXXXXXXXXXXXXXXX
+      reset_password_code:
+        type: string
+        description: Tem a finalidade de especificar o códito de reset da senha do usuário.
+      first_name:
+        type: string
+        description: Primeiro nome do usuário.
+      last_name:
+        type: string
+        description: Último nome do usuário.
+      created_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação do cadastro
+          no sistema
+  Companies:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa uma empresa/companhia específica.
+      name:
+        type: string
+        description: nome da empresa/companhia.
+      logo:
+        type: string
+        description: Logo da empresa/companhia.
+      slug:
+        type: string
+        description: ""
+      quant_users:
+        type: integer
+        description: Quantidade de usuários.
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - active
+            - inactive
+        description: >-
+          Tem a finalidade dizer se a companhia está ativa ou não no sistema. Por
+          examplo, inactive para inativo e active para ativo.
+      created_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação do cadastro
+          no sistema
+      update_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da atualização da companhia/empresa no
+          sistema
+  Agenda:
+    type: object
+    properties:
+      id_agenda:
+        type: integer
+        description: Identificador exclusivo/único que representa uma agenda específica.
+      title:
+        type: string
+        description: Título da agenda
+      type: 
+        type: string
+        description: tipo de agenda (Reunião, treinamento, evento, etc)
+      for_hour:
+        type: string
+        description: Hora do compromisso da agendado
+      for_date:
+        type: string
+        description: Data do compromisso agendado
+      place_id:
+        type: integer
+        description: Chave primária da tabela PLACE
+      observations:
+        type: string
+        description: Observacções sobre a agenda/evento
+      repeat:
+        type: string
+        description: Definição de quando quer que essa agenda se repita ('week','month','year','day','never')
+  Places:
+    type: object
+    properties:
+      id_place:
+        type: integer
+        description: Identificador exclusivo/único que representa um lugar específico.
+      name:
+        type: string
+        description: Nome do lugar
+      cep:
+        type: number
+        description: Cep do lugar
+      state:
+        type: string
+        description: Estado do lugar
+      city_id:
+        type: integer
+        description: Identificador da cidade
+      neighborhood_id:
+        type: integer
+        description: Identificador do bairro
+      address:
+        type: string
+        description: endereço do lugar
+      lat:
+        type: string
+        description: Latitude do local
+      long:
+        type: string
+        description: Longitude do local
+      observations:
+        type: string
+        description: Descrição do local
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - meeting
+            - sales
+  Customers:
+    type: object
+    properties:
+      id_customer:
+        type: integer
+        description: Identificador exclusivo/único que representa um cliente específico no sistema.
+      name:
+        type: string
+        description: O nome do cliente
+      email: 
+        type: string
+        description: email do cliente
+      birthday:
+        type: string
+        description: Data de aniversário 
+      rg:
+        type: string
+        description: rg
+      cpf:
+        type: string
+        description: CPF do cliente
+      mobile:
+        type: string
+        description: Celular
+      phone:
+        type: string
+        description: Telefone
+      sex:
+        type: array
+        items:
+          type: string
+          enum:
+            - m
+            - f
+      children:
+        type: integer
+        description: Quantidade de filhos     
+      state:
+        type: string
+        description: Estado UF
+      city_id:
+        type: integer
+        description: Chave primária da tabela city_id
+      profession:
+        type: string
+        description: Profissão do cliente
+      observations:
+        type: string
+        description: Profissão do cliente
+      income:
+        type: string
+        description: Renda do cliente
+      statte_civil: 
+        type: string
+        description: Estado civil do cliente
+      created_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação do cadastro
+          no sistema
+      update_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da atualização da companhia/empresa no
+          sistema
+      last_user_id:
+        type: string
+        description: >-
+          Identificador do último usuário
+      avatar:
+        type: array
+        items:
+          type: string
+          enum:
+            - waitingForService
+            - madeContact
+            - creatingProposal
+            - proposalPresented
+            - underNegotiation
+            - gain
+            - loss
+      favoritie:
+        type: array
+        items:
+          type: integer
+          enum:
+            - 0
+            - 1
+      email_extra: 
+        type: string
+        description: Email extra
+      phone_residential: 
+        type: string
+        description: Telefone residencial
+      phone_commercial: 
+        type: string
+        description: Telefone comercial
+      address: 
+        type: string
+        description: Endereço
+      business:
+        type: string
+        description: Empresa
+      complement:
+        type: string
+        description: Complemento
+      neighborhood_id:
+        type: integer
+        description: Identificador do bairro
+      origin:
+        type: string
+        description: Origem do cliente
+  Customers_Historical:
+    type: object
+    properties:
+      id_customer_historical:
+        type: integer
+        description: Identificador exclusivo/único que representa o histórico de um cliente
+      subject:
+        type: string
+        description: Forma de contato realizado (E-mail, ligação, Reunião, WhatsApp)
+      message:
+        type: string
+        description: Mensagem 
+      type:
+        type: string
+        description: Tipo de mensagem (call, meeting, mail)
+      created_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação do histórico
+          no sistema
+      user_id:
+        type: integer
+        description: Identificador do cliente relacionado ao histórico
+      request_user_id:
+        type: integer
+        description: Identificador da solicitação do cliente relacionado ao histórico
+      request_user_type:
+        type: integer
+        description: tipo de solicitação do cliente
+      reply_this_id:
+        type: integer
+        description: Identificador de resposta
+      customer_id:
+        type: integer
+        description: Identificador do cliente
+  Task:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa uma tarefa
+      title:
+        type: string
+        description: Título da tarefa
+      type:
+        type: string
+        description: Tipo de tarefa (call, visit, whatsapp, mail)
+      for_hour:
+        type: string
+        description: Hora definida para a realização da tarefa
+      for_date:
+        type: string
+        description: Data para execução da tarefa
+      notes:
+        type: string
+        description: Notas sobre a tarefa
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - open
+            - closed
+      created_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da criação do cadastro da tarefa
+          no sistema
+      update_at:
+        type: string
+        description: >-
+          Tem a finalidade de especificar a data e hora da atualização produto no
+          sistema
+      repeat:
+        type: array
+        items:
+          type: string
+          enum:
+            - week
+            - month
+            - year
+            - day
+  Leads:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa uma fila de clientes
+      name:
+        type: string
+        description: Nome da fila
+      dateStart:
+        type: string
+        description: Data inicial
+      dateEnd:
+        type: string
+        description: Data final
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - active
+            - inactive
+      leads:
+        type: integer
+        description: Quantidade de leads/clientes na fila
+      position:
+        type: integer
+        description: Posição do lead na fila
+      created_at:
+        type: string
+        description:
+          Tem a finalidade de especificar a data e hora da criação do cadastro do lead
+          no sistema
+      update_at:
+        type: string
+        description:
+          Tem a finalidade de especificar a data e hora da atualização do lead no
+          sistema
+      origin:
+        type: string
+        description: 
+          Origem do lead
+      data: 
+        type: string
+        description: 
+          data
+      type: 
+        type: string
+        description: 
+          Tipo da fila de lead (form/integration)
+      form_data: 
+        type: string
+        description: 
+          Dados/campos da fila de leads
+      deleted_at: 
+        type: string
+        description: 
+          Data de exclusão
+  News:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa uma novidade específica no sistema
+      title: 
+        type: string
+        description: Título da novidade
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - active
+            - inactive
+        description: Logo da equipe 
+      article:
+        type: string
+        description: Descricção da novidade   
+      created_at:
+        type: string
+        description: Data de criação da novidade
+      updated_at:
+        type: string
+        description: Data de atualizacão da novidade
+      category_id:
+        type: integer
+        description: Identificador exclusivo/único da categoria da novidade no sistema.
+      cover_id:
+        type: integer
+        description: Identificador exclusivo/único da capa da novidade no sistema.
+  Notifications:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa uma notificação específica no sistema
+      title: 
+        type: string
+        description: Título da notificação
+      type: 
+        type: string
+        description: Tipo de notificação (broker, manager, award, supervisor, news, redemption, product, user, agenda, news, customer)
+      item_id: 
+        type: integer
+        description: Identificador do item
+      user_id: 
+        type: integer
+        description: Identificador do usuário
+      view: 
+        type: integer
+        description: 0 ou 1
+      created_at:
+        type: string
+        description: Data de criação da notificação
+      updated_at:
+        type: string
+        description: Data de atualizacão da notificação
+  Files:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa um arquivo específica no sistema
+      name: 
+        type: string
+        description: Nome do arquivo
+      description: 
+        type: string
+        description: Descrição do arquivo
+      file: 
+        type: string
+        description: Arquivo (png, pdf, jpg)
+      folder: 
+        type: string
+        description: pasta que fica o arquivo
+      path: 
+        type: string
+        description: Caminho do arquivo
+      url: 
+        type: string
+        description: Url do arquivo
+      size: 
+        type: string
+        description: tamanho do arquivo
+      mime: 
+        type: string
+        description: arquivo/tipo do arquivo
+      ower_id: 
+        type: string
+        description: Identificador do dono do arquivo
+      visibility:
+        type: array
+        items:
+          type: string
+          enum:
+            - public
+            - private
+        description: Visibilidade do arquivo
+      access_visibility: 
+        type: string
+        description: Visibilidade de acesso. O valor padrão/default é "all"
+      access_manager: 
+        type: string
+        description: Acessibilidade do gerente. O valor padrão/default é "all"
+      tags: 
+        type: string
+        description: Define o tipo de arquivo, ou melhor, a que se refere este arquio (mapa de disponibilidade, produto)
+      created_at:
+        type: string
+        description: Data de criação do arquivo
+      updated_at:
+        type: string
+        description: Data de atualizacão do arquivo
+      deleted_at:
+        type: string
+        description: Data de remoção do arquivo
+  Galleries:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa uma galeria específica no sistema
+      slug: 
+        type: string
+        description: Especificação da galeria (imagens, plantas, Downloadas)
+      name: 
+        type: string
+        description: Nome da galeria 
+      description: 
+        type: string
+        description: Dsecrição da galeria
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - active
+            - inactive
+        description: Status da galeria
+      mime: 
+        type: string
+        description: arquivo/tipo do arquivo
+      created_at:
+        type: string
+        description: Data de criação da galeria
+      updated_at:
+        type: string
+        description: Data de atualizacão da galeria
+  Tags:
+    type: object
+    properties:
+      id_award:
+        type: integer
+        description: Identificador exclusivo/único que representa uma tag específica no sistema.
+      name:
+        type: string
+        description: O nome da tag
+      category_id: 
+        type: number
+        description: Identificador da categoria da tag
+  Tags_Category:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa uma categoria de tag específica no sistema.
+      name:
+        type: string
+        description: O nome da categoria
+      status:
+        type: array
+        items:
+          type: string
+          enum:
+            - active
+            - inactive
+        description: Status da categoria
+      module:
+        type: string
+        description: O modulo da categoria
+      system:
+        type: integer
+        description: XXXX
+  Configurations:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa um recurso específico no sistema.
+      name:
+        type: string
+        description: O nome da caonfiguração/recurso
+      value:
+        type: string
+        description: ""
+      value_long:
+        type: string
+        description: ""
+      show:
+        type: array
+        items:
+          type: string
+          enum:
+            - 0
+            - 1
+        description: Para definir se a configuração deve ser mosrada ou não (0 ou 1)
+  Tokens:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Identificador exclusivo/único que representa um recurso específico no sistema.
+      user_id:
+        type: integer
+        description: Identificador do usuário
+      api_token:
+        type: string
+        description: Token da API
+      expires_on:
+        type: string
+        description: Data de expiração
+      client:
+        type: string
+        description: Armazena dados de acesso do cliente, exemplo identificação do navegador, dispositivo, etc.
+      created_at:
+        type: string
+        description: Data de criação do recurso
+      updated_at:
+        type: string
+        description: Data de atualizacão do recurso
+      ip:
+        type: string
+        description: IP da máquina
+        
+host: instancia.goscore.com.br
+basePath: /api/v1/
